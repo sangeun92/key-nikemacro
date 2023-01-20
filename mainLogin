@@ -1,0 +1,63 @@
+import chromedriver_autoinstaller
+
+chromedriver_autoinstaller.install()
+
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
+from selenium.webdriver.chrome.options import Options
+import subprocess
+ 
+
+def get_original_chrome_driver():
+    #driver = webdriver.Chrome("C:\Users\ntsys_planner\Downloads\chromedriver_win32\chromedriver.exe")   
+    subprocess.Popen(r'"C:\Program Files\Google\Chrome\Application\chrome.exe" --remote-debugging-port=9222 --user-data-dir="C:\chrometemp"')  
+                       # chrome이 있는 위치를 적어줍니다.
+
+    option = Options()
+    option.add_experimental_option("debuggerAddress", "127.0.0.1:9222")
+
+    chrome_ver = chromedriver_autoinstaller.get_chrome_version().split('.')[0]
+    try:
+        driver = webdriver.Chrome(f'./{chrome_ver}/chromedriver.exe', options=option)
+    except:
+        chromedriver_autoinstaller.install(True)
+        driver = webdriver.Chrome(f'./{chrome_ver}/chromedriver.exe', options=option)
+    driver.implicitly_wait(10)
+    driver.set_window_size(1920, 1080)
+    return driver
+
+driver = get_original_chrome_driver()
+driver.get('https://www.nike.com/kr')
+
+id = '아이디 입력'
+pw = '비밀번호 입력'
+
+
+try:
+    WebDriverWait(driver, 3).until(EC.presence_of_element_located((By.ID, 'hf_title_signin_membership')))
+    elem_btn = driver.find_element(By.ID, 'hf_title_signin_membership')
+    elem_btn.click() # 버튼 클릭
+
+    WebDriverWait(driver, 3).until(EC.presence_of_element_located((By.ID, 'username')))
+    elem_id = driver.find_element(By.ID, 'username')
+    elem_id.send_keys('sangeunpark92@gmail.com') # id 입력
+    
+    #continue1 = driver.find_element(By.XPATH, '//button[@class="css-18y7846 btn-primary-dark  btn-md"]')
+    #continue1.click()
+    continue1 = driver.find_element(By.XPATH, '//button[@class="css-18y7846 btn-primary-dark  btn-md"]')
+    continue1.click()
+  
+    #체크박스
+    driver.find_element_by_id("agreeToAll").click()
+
+    WebDriverWait(driver, 3).until(EC.presence_of_element_located((By.ID, 'agreeToAll')))
+    elem_pw = driver.find_element(By.ID, 'j_password')
+    elem_pw.send_keys(pw)
+
+    login_btn = driver.find_element(By.XPATH, '//button[@class="button large width-max"]')
+    login_btn.click()
+except: # 이미 로그인이 되어있는 경우
+    pass 
