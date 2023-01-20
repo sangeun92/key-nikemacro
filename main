@@ -1,0 +1,56 @@
+import chromedriver_autoinstaller
+
+chromedriver_autoinstaller.install()
+
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.keys import Keys
+import subprocess
+import select
+ 
+
+def get_original_chrome_driver():
+    #driver = webdriver.Chrome("C:\Users\ntsys_planner\Downloads\chromedriver_win32\chromedriver.exe")   
+    subprocess.Popen(r'"C:\Program Files\Google\Chrome\Application\chrome.exe" --remote-debugging-port=9222 --user-data-dir="C:\chrometemp"')  
+                       # chrome이 있는 위치를 적어줍니다.
+
+    option = Options()
+    option.add_experimental_option("debuggerAddress", "127.0.0.1:9222")
+
+    chrome_ver = chromedriver_autoinstaller.get_chrome_version().split('.')[0]
+    try:
+        driver = webdriver.Chrome(f'./{chrome_ver}/chromedriver.exe', options=option)
+    except:
+        chromedriver_autoinstaller.install(True)
+        driver = webdriver.Chrome(f'./{chrome_ver}/chromedriver.exe', options=option)
+    driver.implicitly_wait(10)
+    driver.set_window_size(1920, 1080)
+    return driver
+
+driver = get_original_chrome_driver()
+driver.get('https://www.nike.com/kr')
+
+
+while 1:
+        
+    WebDriverWait(driver, 3).until(EC.presence_of_element_located((By.ID, 'VisualSearchInput')))
+    elem_id = driver.find_element(By.ID, 'VisualSearchInput')
+    elem_id.send_keys('에어포스') # 신발검색
+    
+    onclick1 = driver.find_element(By.XPATH, '//button[@class="pre-search-btn ripple"]')
+    onclick1.click()#검색 버튼
+
+    
+    WebDriverWait(driver, 3).until(EC.presence_of_element_located((By.CLASS_NAME, 'filter-group__items-group')))
+    elem_btn1 = driver.find_element(By.XPATH, '//a[@href="https://www.nike.com/kr/w/women-5e1x6?q=에어포스"]')
+    elem_btn1.click() # 성별 체크
+    
+    WebDriverWait(driver, 3).until(EC.presence_of_element_located((By.ID, 'skip-to-products')))
+    elem_btn2 = driver.find_element(By.CSS_SELECTOR,'#skip-to-products > div:nth-child(2) > div > figure > a.product-card__link-overlay')
+    elem_btn2.send_keys(kesy.ENTER)# 신발 선택
+
+
